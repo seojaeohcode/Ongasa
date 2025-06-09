@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>온가사 번안 서비스</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f6fa;
+            --text-color: #2c3e50;
+            --border-color: #dcdde1;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .text-area {
+            min-height: 250px;
+            resize: vertical;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .text-area:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+        }
+
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-translate {
+            font-size: 1.1rem;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-translate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(74, 144, 226, 0.4);
+            background-color: #357abd;
+        }
+
+        .btn-switch {
+            background-color: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-switch:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .example-btn {
+            margin: 0.5rem;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .example-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+        }
+
+        #furigana {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .language-selector {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .language-selector i {
+            color: var(--primary-color);
+        }
+
+        .translation-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .translation-area {
+            flex: 1;
+            min-width: 0; /* flex item이 부모 컨테이너를 넘어가지 않도록 */
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .control-panel {
+                margin: 1rem 0;
+                padding: 1rem;
+                flex-direction: column;
+            }
+
+            .translation-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">온가사 번안 서비스</h1>
+        
+        <!-- 중앙 컨트롤 패널 -->
+        <div class="control-panel">
+            <button class="btn btn-translate" onclick="translate()">
+                <i class="fas fa-exchange-alt"></i> 번안하기
+            </button>
+            <button class="btn btn-switch" onclick="switchLanguages()">
+                <i class="fas fa-random"></i> 언어 전환
+            </button>
+        </div>
+
+        <div class="translation-container">
+            <!-- 입력 영역 -->
+            <div class="translation-area">
+                <div class="language-selector">
+                    <i class="fas fa-language"></i>
+                    <select class="form-select" id="sourceLanguage">
+                        <option value="ko">한국어</option>
+                        <option value="ja">일본어</option>
+                    </select>
+                </div>
+                <textarea class="form-control text-area" id="sourceText" 
+                    placeholder="번안할 한국어 또는 일본어 가사를 입력해주세요."></textarea>
+                <div class="mt-2">
+                    <button class="btn example-btn" onclick="loadExample('ko')">
+                        <i class="fas fa-music"></i> 한국어 예시
+                    </button>
+                    <button class="btn example-btn" onclick="loadExample('ja')">
+                        <i class="fas fa-music"></i> 일본어 예시
+                    </button>
+                </div>
+            </div>
+
+            <!-- 출력 영역 -->
+            <div class="translation-area">
+                <div class="language-selector">
+                    <i class="fas fa-language"></i>
+                    <select class="form-select" id="targetLanguage">
+                        <option value="ja">일본어</option>
+                        <option value="ko">한국어</option>
+                    </select>
+                </div>
+                <textarea class="form-control text-area" id="targetText" readonly></textarea>
+                <!-- <div id="furigana" class="mt-2 text-muted small"></div> -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function translate() {
+            // TODO: 실제 번역 API 연동
+            const sourceText = document.getElementById('sourceText').value;
+            document.getElementById('targetText').value = sourceText;
+        }
+
+        function switchLanguages() {
+            const sourceLang = document.getElementById('sourceLanguage');
+            const targetLang = document.getElementById('targetLanguage');
+            const temp = sourceLang.value;
+            sourceLang.value = targetLang.value;
+            targetLang.value = temp;
+        }
+
+        function loadExample(lang) {
+            const examples = {
+                ko: "우리 함께라면\n어떤 것도 두렵지 않아\n서로의 손을 잡고\n앞으로 나아가자",
+                ja: "二人でいれば\n何も怖くない\n手を繋いで\n前に進もう"
+            };
+            document.getElementById('sourceText').value = examples[lang];
+            document.getElementById('sourceLanguage').value = lang;
+            document.getElementById('targetLanguage').value = lang === 'ko' ? 'ja' : 'ko';
+        }
+    </script>
+</body>
+</html> 

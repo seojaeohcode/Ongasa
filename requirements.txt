@@ -1,6 +1,11 @@
-Flask
 Werkzeug
 Jinja2
 MarkupSafe
 itsdangerous
 click
+flask==2.3.3
+torch>=2.0.0
+transformers>=4.30.0
+tokenizers>=0.13.0
+sentencepiece>=0.1.99
+protobuf>=3.20.0

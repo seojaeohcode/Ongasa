@@ -177,11 +177,8 @@
         
         <!-- 중앙 컨트롤 패널 -->
         <div class="control-panel">
-            <button class="btn btn-translate" onclick="translate()">
+            <button class="btn btn-translate" id="translateBtn">
                 <i class="fas fa-exchange-alt"></i> 번안하기
-            </button>
-            <button class="btn btn-switch" onclick="switchLanguages()">
-                <i class="fas fa-random"></i> 언어 전환
             </button>
         </div>
 
@@ -190,18 +187,14 @@
             <div class="translation-area">
                 <div class="language-selector">
                     <i class="fas fa-language"></i>
-                    <select class="form-select" id="sourceLanguage">
-                        <option value="ko">한국어</option>
-                        <option value="ja">일본어</option>
-                    </select>
+                    <span class="form-select" style="background-color: #f8f9fa; border-color: #dee2e6;">
+                        일본어
+                    </span>
                 </div>
                 <textarea class="form-control text-area" id="sourceText" 
-                    placeholder="번안할 한국어 또는 일본어 가사를 입력해주세요."></textarea>
+                    placeholder="번안할 일본어 가사를 입력해주세요."></textarea>
                 <div class="mt-2">
-                    <button class="btn example-btn" onclick="loadExample('ko')">
-                        <i class="fas fa-music"></i> 한국어 예시
-                    </button>
-                    <button class="btn example-btn" onclick="loadExample('ja')">
+                    <button class="btn example-btn" id="exampleBtn">
                         <i class="fas fa-music"></i> 일본어 예시
                     </button>
                 </div>
@@ -211,10 +204,9 @@
             <div class="translation-area">
                 <div class="language-selector">
                     <i class="fas fa-language"></i>
-                    <select class="form-select" id="targetLanguage">
-                        <option value="ja">일본어</option>
-                        <option value="ko">한국어</option>
-                    </select>
+                    <span class="form-select" style="background-color: #f8f9fa; border-color: #dee2e6;">
+                        한국어
+                    </span>
                 </div>
                 <textarea class="form-control text-area" id="targetText" readonly></textarea>
                 <!-- <div id="furigana" class="mt-2 text-muted small"></div> -->
@@ -223,29 +215,88 @@
     </div>
 
     <script>
-        function translate() {
-            // TODO: 실제 번역 API 연동
+        // DOM이 완전히 로드된 후 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM 로드 완료, 이벤트 리스너 설정 중...');
+            
+            // 번안하기 버튼 이벤트 리스너
+            document.getElementById('translateBtn').addEventListener('click', translate);
+            
+            // 예시 버튼 이벤트 리스너
+            document.getElementById('exampleBtn').addEventListener('click', loadExample);
+            
+            console.log('이벤트 리스너 설정 완료');
+        });
+
+        async function translate() {
             const sourceText = document.getElementById('sourceText').value;
-            document.getElementById('targetText').value = sourceText;
+            const targetTextArea = document.getElementById('targetText');
+            
+            console.log('번안 시작:', sourceText);
+            
+            if (!sourceText.trim()) {
+                alert('번안할 일본어 가사를 입력해주세요.');
+                return;
+            }
+            
+            // 로딩 표시
+            targetTextArea.value = '번안 중...';
+            
+            try {
+                console.log('API 호출 시작...');
+                const response = await fetch('/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: sourceText
+                    })
+                });
+                
+                console.log('API 응답 상태:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('API 응답 데이터:', data);
+                
+                targetTextArea.value = data.translated_text || '번안 결과가 없습니다.';
+                
+            } catch (error) {
+                console.error('번안 중 오류 발생:', error);
+                targetTextArea.value = `번안 중 오류가 발생했습니다: ${error.message}`;
+            }
         }
 
-        function switchLanguages() {
-            const sourceLang = document.getElementById('sourceLanguage');
-            const targetLang = document.getElementById('targetLanguage');
-            const temp = sourceLang.value;
-            sourceLang.value = targetLang.value;
-            targetLang.value = temp;
-        }
-
-        function loadExample(lang) {
+        async function loadExample() {
             const examples = {
                 ko: "우리 함께라면\n어떤 것도 두렵지 않아\n서로의 손을 잡고\n앞으로 나아가자",
                 ja: "二人でいれば\n何も怖くない\n手を繋いで\n前に進もう"
             };
-            document.getElementById('sourceText').value = examples[lang];
-            document.getElementById('sourceLanguage').value = lang;
-            document.getElementById('targetLanguage').value = lang === 'ko' ? 'ja' : 'ko';
+            
+            document.getElementById('sourceText').value = examples['ja'];
+            document.getElementById('targetText').value = '번안 중...';
+            
+            console.log('예시 로드됨, 번안 시작...');
+            
+            // 예시 로드 후 자동 번안
+            setTimeout(() => {
+                translate();
+            }, 100);
         }
+        
+        // 페이지 로드 시 서버 연결 상태 확인
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/');
+                console.log('서버 연결 상태:', response.status);
+            } catch (error) {
+                console.error('서버 연결 실패:', error);
+            }
+        });
     </script>
 </body>
 </html> 
